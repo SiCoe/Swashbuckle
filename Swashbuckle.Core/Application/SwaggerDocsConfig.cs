@@ -35,6 +35,7 @@ namespace Swashbuckle.Application
         private readonly IList<Func<IOperationFilter>> _operationFilters;
         private readonly IList<Func<IDocumentFilter>> _documentFilters;
         private readonly IList<Func<XPathDocument>> _xmlDocFactories;
+        private IXmlCommentsFilterLoader _xmlCommentsFilterLoader;
         private Func<IEnumerable<ApiDescription>, ApiDescription> _conflictingActionsResolver;
         private Func<HttpRequestMessage, string> _rootUrlResolver;
 
@@ -221,6 +222,11 @@ namespace Swashbuckle.Application
             _xmlDocFactories.Add(() => new XPathDocument(filePath));
         }
 
+        public void XmlCommentsFilterLoader(IXmlCommentsFilterLoader xmlCommentsFilterLoader)
+        {
+            _xmlCommentsFilterLoader = xmlCommentsFilterLoader;
+        }
+
         public void ResolveConflictingActions(Func<IEnumerable<ApiDescription>, ApiDescription> conflictingActionsResolver)
         {
             _conflictingActionsResolver = conflictingActionsResolver;
@@ -248,11 +254,12 @@ namespace Swashbuckle.Application
             // custom filters AND so they can share the same XPathDocument (perf. optimization)
             var modelFilters = _modelFilters.Select(factory => factory()).ToList();
             var operationFilters = _operationFilters.Select(factory => factory()).ToList();
+            var xmlCommentsFilterLoader = _xmlCommentsFilterLoader ?? new DefaultXmlCommentsFilterLoader();
             foreach (var xmlDocFactory in _xmlDocFactories)
             {
                 var xmlDoc = xmlDocFactory();
-                modelFilters.Insert(0, new ApplyXmlTypeComments(xmlDoc));
-                operationFilters.Insert(0, new ApplyXmlActionComments(xmlDoc));
+                modelFilters.Insert(0, xmlCommentsFilterLoader.GetXmlCommentsModelFilter(xmlDoc));
+                operationFilters.Insert(0, xmlCommentsFilterLoader.GetXmlCommentsActionFilter(xmlDoc));
             }
 
             var options = new SwaggerGeneratorOptions(

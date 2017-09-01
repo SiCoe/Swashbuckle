@@ -7,39 +7,43 @@ using System.Xml.XPath;
 
 namespace Swashbuckle.Swagger.XmlComments
 {
-    public class ApplyXmlActionComments : IOperationFilter
+    public class ApplyXmlActionComments : XmlCommentsOperationFilter
     {
-        private const string MemberXPath = "/doc/members/member[@name='{0}']";
         private const string SummaryXPath = "summary";
         private const string RemarksXPath = "remarks";
         private const string ParamXPath = "param[@name='{0}']";
         private const string ResponseXPath = "response";
 
-        private readonly XPathDocument _xmlDoc;
-
         public ApplyXmlActionComments(string filePath)
             : this(new XPathDocument(filePath)) { }
 
         public ApplyXmlActionComments(XPathDocument xmlDoc)
-        {
-            _xmlDoc = xmlDoc;
-        }
+            : base(xmlDoc) { }
 
-        public void Apply(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
+        public override void Apply(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
         {
             var reflectedActionDescriptor = apiDescription.ActionDescriptor as ReflectedHttpActionDescriptor;
             if (reflectedActionDescriptor == null) return;
 
             XPathNavigator navigator;
-            lock (_xmlDoc)
+            lock (XmlDoc)
             {
-                navigator = _xmlDoc.CreateNavigator();
+                navigator = XmlDoc.CreateNavigator();
             }
 
             var commentId = XmlCommentsIdHelper.GetCommentIdForMethod(reflectedActionDescriptor.MethodInfo);
             var methodNode = navigator.SelectSingleNode(string.Format(MemberXPath, commentId));
             if (methodNode == null) return;
 
+            ApplyOperationComments(operation, methodNode);
+
+            ApplyParamComments(operation, methodNode, reflectedActionDescriptor.MethodInfo);
+
+            ApplyResponseComments(operation, methodNode);
+        }
+
+        protected static void ApplyOperationComments(Operation operation, XPathNavigator methodNode)
+        {
             var summaryNode = methodNode.SelectSingleNode(SummaryXPath);
             if (summaryNode != null)
                 operation.summary = summaryNode.ExtractContent();
@@ -47,13 +51,9 @@ namespace Swashbuckle.Swagger.XmlComments
             var remarksNode = methodNode.SelectSingleNode(RemarksXPath);
             if (remarksNode != null)
                 operation.description = remarksNode.ExtractContent();
-
-            ApplyParamComments(operation, methodNode, reflectedActionDescriptor.MethodInfo);
-
-            ApplyResponseComments(operation, methodNode);
         }
 
-        private static void ApplyParamComments(Operation operation, XPathNavigator methodNode, MethodInfo method)
+        protected static void ApplyParamComments(Operation operation, XPathNavigator methodNode, MethodInfo method)
         {
             if (operation.parameters == null) return;
 
@@ -74,7 +74,7 @@ namespace Swashbuckle.Swagger.XmlComments
             }
         }
 
-        private static void ApplyResponseComments(Operation operation, XPathNavigator methodNode)
+        protected static void ApplyResponseComments(Operation operation, XPathNavigator methodNode)
         {
             var responseNodes = methodNode.Select(ResponseXPath);
 

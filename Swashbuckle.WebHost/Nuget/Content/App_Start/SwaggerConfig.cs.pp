@@ -61,7 +61,7 @@ namespace $rootnamespace$
                         //c.BasicAuth("basic")
                         //    .Description("Basic HTTP Authentication");
                         //
-						// NOTE: You must also configure 'EnableApiKeySupport' below in the SwaggerUI section
+                        // NOTE: You must also configure 'EnableApiKeySupport' below in the SwaggerUI section
                         //c.ApiKey("apiKey")
                         //    .Description("API Key Authentication")
                         //    .Name("apiKey")
@@ -102,6 +102,13 @@ namespace $rootnamespace$
                         // more Xml comment files.
                         //
                         //c.IncludeXmlComments(GetXmlCommentsPath());
+
+                        // If you would like to change the default way the Xml comments are applied to the JSON schema you can
+                        // create a custom XmlCommentsOperationFilter and custom XmlCommentsModelFilter then pass your 
+                        // implimentation of an IXmlCommentsFilterLoader so for Swashbuckle to get instances using the Xml 
+                        // documents from IncludeXmlComments above.
+                        //
+                        //c.XmlCommentsFilterLoader(new IXmlCommentsFilterLoader())
 
                         // Swashbuckle makes a best attempt at generating Swagger compliant JSON schemas for the various types
                         // exposed in your API. However, there may be occasions when more control of the output is needed.

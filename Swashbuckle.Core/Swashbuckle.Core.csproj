@@ -88,6 +88,10 @@
     <Compile Include="Application\SwaggerDocsConfig.cs" />
     <Compile Include="Application\HttpConfigurationExtensions.cs" />
     <Compile Include="Swagger\Annotations\ApplySwaggerResponseAttributes.cs" />
+    <Compile Include="Swagger\XmlComments\DefaultXmlCommentsFilterLoader.cs" />
+    <Compile Include="Swagger\XmlComments\XmlCommentsFilter.cs" />
+    <Compile Include="Swagger\XmlComments\IXmlCommentsFilterLoader.cs" />
+    <Compile Include="Swagger\XmlComments\XmlCommentsModelFilter.cs" />
     <Compile Include="Swagger\XmlComments\XmlCommentsIdHelper.cs" />
     <Compile Include="Swagger\IModelFilter.cs" />
     <Compile Include="Swagger\StringExtensions.cs" />
@@ -112,6 +116,7 @@
     <Compile Include="SwaggerUi\EmbeddedAssetProvider.cs" />
     <Compile Include="SwaggerUi\IAssetProvider.cs" />
     <Compile Include="SwaggerUi\StreamExtensions.cs" />
+    <Compile Include="Swagger\XmlComments\XmlCommentsOperationFilter.cs" />
     <Compile Include="Swagger\XmlComments\XmlTextHelper.cs" />
     <Compile Include="Swagger\XmlComments\XPathNavigatorExtensions.cs" />
   </ItemGroup>

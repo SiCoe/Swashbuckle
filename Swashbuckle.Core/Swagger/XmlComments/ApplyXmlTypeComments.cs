@@ -3,27 +3,22 @@ using System.Xml.XPath;
 
 namespace Swashbuckle.Swagger.XmlComments
 {
-    public class ApplyXmlTypeComments : IModelFilter
+    public class ApplyXmlTypeComments : XmlCommentsModelFilter
     {
-        private const string MemberXPath = "/doc/members/member[@name='{0}']";
         private const string SummaryTag = "summary";
-
-        private readonly XPathDocument _xmlDoc;
 
         public ApplyXmlTypeComments(string filePath)
             : this(new XPathDocument(filePath)) { }
 
         public ApplyXmlTypeComments(XPathDocument xmlDoc)
-        {
-            _xmlDoc = xmlDoc;
-        }
+            : base(xmlDoc) { }
 
-        public void Apply(Schema model, ModelFilterContext context)
+        public override void Apply(Schema model, ModelFilterContext context)
         {
             XPathNavigator navigator;
-            lock (_xmlDoc)
+            lock (XmlDoc)
             {
-                navigator = _xmlDoc.CreateNavigator();
+                navigator = XmlDoc.CreateNavigator();
             }
 
             var commentId = XmlCommentsIdHelper.GetCommentIdForType(context.SystemType);
@@ -48,7 +43,7 @@ namespace Swashbuckle.Swagger.XmlComments
             }
         }
 
-        private static void ApplyPropertyComments(XPathNavigator navigator, Schema propertySchema, PropertyInfo propertyInfo)
+        protected static void ApplyPropertyComments(XPathNavigator navigator, Schema propertySchema, PropertyInfo propertyInfo)
         {
             if (propertyInfo == null) return;
 
